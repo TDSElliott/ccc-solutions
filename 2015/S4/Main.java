@@ -1,5 +1,3 @@
-package S4_2015_ConvexHull;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -15,58 +13,77 @@ import java.util.PriorityQueue;
  * Created on 08/02/2017.
  */
 public class Main {
-	island[] islands = new island[10010];
 	public static void main(String[] args) throws IOException {
+		// Buffered reader is very fast, necessary for CCC input
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		String[] parameters = br.readLine().split(" ");
-		int k = Integer.parseInt(parameters[0]);
-		int n = Integer.parseInt(parameters[1]);
-		int m = Integer.parseInt(parameters[2]);
+
+		int thickness = Integer.parseInt(parameters[0]);	// hull length
+		int islandsNum = Integer.parseInt(parameters[1]);	// number of islands
+		int routes = Integer.parseInt(parameters[2]); 		// number of routes between islands
+		Island[] islands = new Island[islandsNum];
 
 		int a = 0; int b = 0; int t = 0; int h = 0;
 
-		List<edge> graph = new ArrayList<edge>();
-		int[][] dist = new int[2001][201];
-		boolean[] inq = new boolean[2001];
-		Arrays.fill(dist, 63);
-
-		for (int x = 0; x < m; x++) {
+		for (int x = 0; x < routes; x++) {
 			String[] seaRouteData = br.readLine().split(" ");
-			a = Integer.parseInt(seaRouteData[0]);
-			b = Integer.parseInt(seaRouteData[1]);
-			t = Integer.parseInt(seaRouteData[2]);
-			h = Integer.parseInt(seaRouteData[3]);
+			a = Integer.parseInt(seaRouteData[0]) - 1; // island 1
+			b = Integer.parseInt(seaRouteData[1]) - 1; // island 2
 
-			graph.add(a, new edge(b, t, h));
-			graph.add(b, new edge(a, t, h));
+			// Island 1 already there?
+			if(islands[a] == null) {
+				islands[a] = new Island(thickness, a); // new island with default thickness and identify of the first island
+				islands[a].visited = new boolean[islandsNum];
+			}
+			// Island 2 already there?
+			if(islands[b] == null) {
+				islands[b] = new Island(thickness, b);
+				islands[b].visited = new boolean[islandsNum];
+			}
+
+			times = Integer.parseInt(seaRouteData[2]); // time on this route
+			wear = Integer.parseInt(seaRouteData[3]); // hull damage on this route
+
+			islands[a].routes.add(new Route(islands[a], islands[b], wear, times));
+			islands[b].routes.add(new Route(islands[b], islands[a], wear, times));
 		}
+		String[] RTF = br.readLine().split(" ");
+		int start = Integer.parseInt(RTF[0]);
+		int end = Integer.parseInt(RTF[1]);
 
-		String[] routeToFollow = br.readLine().split(" ");
-		int A = Integer.parseInt(routeToFollow[0]);
-		int B = Integer.parseInt(routeToFollow[1]);
-
-		PriorityQueue<Pair<Integer, Integer>> que;
+		System.out.println(dijkstra());
 	}
 
-}
-
-class canal {
-	island[] destination = new island[10010];
-	long weight;
-	long hullDamage;
-	canal(ArrayList<island> dest, long w, long dmg) {
-		destination = dest;
-		weight = w;
-		hullDamage = dmg;
+	public int dijkstra() {
+		int minTIme = Integer.MAX_VALUE;
 	}
 }
 
-class island {
-	ArrayList<canal> outgoing = new ArrayList<canal>();
-	int shortestpath, hull;
-	island() {
-		shortestpath = 999;
-		hull = -1;
+class Route {
+	Island a; // from this island
+	Island b; // to this island
+	int wear; // how much does it wear the hull?
+	int time; // how long does it take to travel?
+
+	// Constructor
+	public Route(Island a, Island b, int wear, int time) {
+		this.a = a;
+		this.b = b;
+		this.wear = wear;
+		this.time = time;
+	} // end constructor
+} // end Route
+
+class Island {
+	int time; // time value to this island from source
+	int wear; // wear on hull to this island from source
+	int num;  // which island?
+	ArrayList<Route> routes = new ArrayList<Route>();
+	boolean[] visited; // visited array
+
+	public Island(int wear, int num) {
+		this.wear = wear;
+		this.num = num;
 	}
 }
 
